@@ -2742,7 +2742,7 @@ def tiny_plan(num_chunks: int):
     )
 
 
-def run_chunks(
+async def run_chunks(
     client: Any,
     plan: Any,
     *,
@@ -2750,7 +2750,7 @@ def run_chunks(
     prompt: str | None = None,
     condition_on_previous_text: bool = False,
     adapter: Any = None,
-):
+) -> list[str]:
     from sglang_omni.serve.transcription_adapters.base import (
         DefaultTranscriptionAdapter,
     )
@@ -2758,7 +2758,7 @@ def run_chunks(
 
     if adapter is None:
         adapter = DefaultTranscriptionAdapter()
-    return asyncio.wait_for(
+    chunk_transcripts = await asyncio.wait_for(
         transcribe_audio_chunks(
             client,
             plan,
@@ -2776,6 +2776,7 @@ def run_chunks(
         ),
         timeout=10.0,
     )
+    return [chunk_transcript.text for chunk_transcript in chunk_transcripts]
 
 
 class ScriptedChunkClient:
